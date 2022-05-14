@@ -1,0 +1,89 @@
+				ZELDA STYLE GAME WITH PYGAMES LIB BY CLEAR-CODE
+
+Source: https://www.youtube.com/watch?v=QU1pPzEGrqw&ab_channel=ClearCode
+
+					MINUTO 40 COLLISIONS
+
+COLLISIONS: pygame puede decirme si ha ocurrido una colisión,pero no en que lado del sprite.Afortunadamente se puede solucionar,pero hay que tener esto en cuenta en pygame la direccion:
+ 
+ def collision(self,direction):
+    if direction == 'horizontal':
+      pass <- haré algo
+    if direction == 'vertical':
+      pass <- haré otra cosa
+Buscar el método collision en la clase Player para la impl.
+También hubo que retocar def move:
+  def move(self,speed):
+    #si se mueve en diagonal hay que normalizar speed
+    if self.direction.magnitude() != 0:
+      self.direction = self.direction.normalize()
+    # no uso self.speed ya que valdrá para mover cualquier cosa
+    self.rect.x += self.direction.x * speed
+    self.collision('horizontal')
+    self.rect.y += self.direction.y * speed
+    self.collision('vertical')
+Más tarde crearemos un pequeño gap para que no se pare exactamente cuando empieza el sprite y dé la sensación de que hace overlap entre el sprite del player y el
+del obstacle.
+  
+				MINUTO 50 CREATING THE CAMERA
+
+NOTA: puedo conseguir la camara y el overlap anterior customizando un group.Hasta ahora sólo habiamos usado los grupos para:
+1- Almacenar y dibujar sprites
+2- Llamar al método update
+*Sin embargo puedo añadir métodos o cambiar como funcionan los grupos
+
+Fijate que es aqui donde los usé(level.py):
+    # sprites group setup(visibles y colisionables)
+    self.visible_sprites = pygame.sprite.Group()
+    self.obstacle_sprites = pygame.sprite.Group()
+
+Con todo esto puedo crear una clase para la Camara que herede de un Group:
+
+class YSortCameraGroup(pygame.sprite.Group):  #extiende de Group
+  def __init__(self):
+    # general setup
+    super().__init__()
+    self.display_surface = pygame.display.get_surface()
+    # saco los dos centros
+    self.half_width = self.display_surface.get_size()[0] // 2
+    self.half_height = self.display_surface.get_size()[1] // 2
+    self.offset = pygame.math.Vector2()
+    
+  def custom_draw(self,player):
+    # getting the offset
+    self.offset.x = player.rect.centerx - self.half_width
+    self.offset.y = player.rect.centery - self.half_height
+
+    for sprite in self.sprites():
+      offset_pos = sprite.rect.topleft - self.offset
+      self.display_surface.blit(sprite.image,offset_pos)
+
+			MINUTO 1H01 ADDING THE OVERLAP
+
+Each sprite gets a hitbox for the collision.Nuestro objetivo es reducir un poco el hitbox para la collision con el player(a su cuerpo)
+Para ello usaré inflate(x,y) que reduce el tamaño de un rectángulo:
+self.hitbox = self.rect.inflate(0,-10) 
+Aun faltó los overlaps.
+
+			MINUTO 1H 10 USING PROPER GRAPHICS
+
+En este punto el autor recalca que tiene un tutorial con Tiled(Un editor de screens para 2D).Es el tutorial de Mario.Esta sección será muy extensa:
+1-La imagen
+1h32
+TIP: puedo caminar por el file system en python con el método walk de la lib os:
+from os import walk
+
+def import_folder(path):  
+  for data in walk(path):
+    print(data)
+
+import_folder('./zelda-graphics/1 - level/map')
+Pero,ojo,walk me devuelve tres argumentos,primero el nombre del folder,no lo quiero,despues una list con los subfolders(viene una empty list []),y como tercero viene una lista de files.Fijate que necesitaré combinar el path inicial con cada arg de la lista para crear el path completo para automatizar los imports:
+
+			1H 56 PROPER PLAYER GRAPHICS AND ANIMATIONS
+
+Turno del sprite para el player.Lo primero de todo es entender que el jugador va a tener varios estados(12 en total):
+4 x idle,4 x walk, 4 x attack 
+ Básicamente según el estado realizará una animación(habrá que importarlas pues).
+También tendrá la habilidad de atacar y de magic input(??)
+1h57m
