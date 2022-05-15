@@ -86,4 +86,39 @@ Turno del sprite para el player.Lo primero de todo es entender que el jugador va
 4 x idle,4 x walk, 4 x attack 
  Básicamente según el estado realizará una animación(habrá que importarlas pues).
 También tendrá la habilidad de atacar y de magic input(??)
-1h57m
+
+Para el ataque fisico y mágico necesitaré unos cooldowns:
+Propiedades de PLAYER
+    self.attacking = False
+    self.attack_cooldown = 400
+    self.attack_time = None
+
+En def input(self)
+    # attack input
+    if keys[pygame.K_SPACE] and not self.attacking:
+      self.attacking = True
+      self.attack_time = pygame.time.get_ticks() 
+    # magic input
+    if keys[pygame.K_LCTRL] and not self.attacking:
+      self.attacking = True
+      self.attack_time = pygame.time.get_ticks() 
+
+  def cooldowns(self):
+    current_time = pygame.time.get_ticks() # este se llama multiples veces
+    if self.attacking:
+      if current_time - self.attack_time > self.attack_cooldown:
+        self.attacking = False
+        self.attack_time = None
+    
+NOTA: cada animación van a ser 5 sprites.Una vez dilucidado el status del player habrá que cargar esa secuencia de imagenes 
+  def animate(self):
+    animation = self.animations[self.status] # esto me da una lista o array
+    # loop over the frame indexes
+    self.frame_index += self.animation_speed
+    if self.frame_index >= len(animation): # volver a empezar la animation
+      self.frame_index = 0
+    #set the image
+    self.image = animation[int(self.frame_index)]
+    self.rect = self.image.get_rect(center = self.hitbox.center) # hay que actualizar el cento por la diferencia de tamaño de las images
+
+2H30M
