@@ -5,16 +5,18 @@ from tile import Tile
 from player import Player
 from debug import debug
 from random import choice
-
+from weapon import Weapon
 class Level:
   def __init__(self):
     # get the display surface    
     self.display_surface = pygame.display.get_surface()
 
     # sprites group setup(visibles y colisionables)
-    # self.visible_sprites = pygame.sprite.Group()
     self.visible_sprites = YSortCameraGroup()
     self.obstacle_sprites = pygame.sprite.Group()
+    
+    # attack sprites
+    self.current_attack = None
 
     #sprite setup
     self.create_map()
@@ -45,10 +47,16 @@ class Level:
               Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'object',surf)
               pass
     # no confundir,al player le meto solo en un grupo,el tercer arg es para el constructor(es decir,que son 3 args)
-    self.player = Player((2000,1430),[self.visible_sprites],self.obstacle_sprites)
+    self.player = Player((2000,1430),[self.visible_sprites],self.obstacle_sprites,self.create_attack,self.destroy_attack)
           
-    
+  def create_attack(self):
+    self.current_attack = Weapon(self.player,[self.visible_sprites]) 
         
+  def destroy_attack(self):
+    if self.current_attack:
+      self.current_attack.kill() # kill() es un metodo de pygame.sprite.Group
+    self.current_attack = None
+    
   def run(self):
     # update and draw the game
     # self.visible_sprites.draw(self.display_surface)

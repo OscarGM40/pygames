@@ -121,4 +121,27 @@ NOTA: cada animación van a ser 5 sprites.Una vez dilucidado el status del playe
     self.image = animation[int(self.frame_index)]
     self.rect = self.image.get_rect(center = self.hitbox.center) # hay que actualizar el cento por la diferencia de tamaño de las images
 
-2H30M
+				2H30M WEAPONS
+
+Básicamente crearemos un sprite cuando el jugador ataque y lo destruiremos cuando termine de atacar.
+Para ello vamos a crear la clase Weapon en weapon.py, y al crear el player le pasamos una funcion create_attack:
+    self.player = Player((2000,1430),[self.visible_sprites],self.obstacle_sprites,self.create_attack)
+          
+  def create_attack(self):
+    Weapon(self.player,[self.visible_sprites]) 
+    full_path = f'./zelda-graphics/1 - level/graphics/weapons/{player.weapon}/{direction}.png'
+    self.image = pygame.image.load(full_path).convert_alpha() # convert_alpha para que no se vea transparente
+
+    # placement
+    if direction == 'right':
+      self.rect = self.image.get_rect(midleft=player.rect.midright + pygame.math.Vector2(0,16)) # 16px relativos 
+    elif direction == 'left':
+      self.rect = self.image.get_rect(midright=player.rect.midleft + pygame.math.Vector2(0,16))
+    elif direction == 'up':
+      self.rect = self.image.get_rect(midbottom=player.rect.midtop + pygame.math.Vector2(-10,0))
+    elif direction == 'down':
+      self.rect = self.image.get_rect(midtop=player.rect.midbottom + pygame.math.Vector2(-10,0))
+
+					3h 04 CREATING THE UI
+
+Hay que crear la healthbar,la energy bar, la experience bar,el cargador de magic,etc.

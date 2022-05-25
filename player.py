@@ -3,7 +3,7 @@ from settings import *
 from support import import_folder
 
 class Player(pygame.sprite.Sprite):
-  def __init__(self,pos,groups,obstacle_sprites):
+  def __init__(self,pos,groups,obstacle_sprites,create_attack,destroy_attack):
     #le paso los groups al padre
     super().__init__(groups)
     self.image = pygame.image.load('./zelda-graphics/5 - level graphics/graphics/test/player.png').convert_alpha()
@@ -23,6 +23,15 @@ class Player(pygame.sprite.Sprite):
     self.attack_cooldown = 400
     self.attack_time = None
     self.obstacle_sprites = obstacle_sprites
+
+    #weapon setup
+    self.create_attack = create_attack # funcion que crea el ataque
+    self.destroy_attack = destroy_attack # funcion que destruye el ataque
+    self.weapon_index = 0 # selector de arma
+    self.weapon = list(weapon_data.keys())[self.weapon_index]
+    self.can_switch_weapon = True
+    self.weapon_switch_time = None
+    self.switch_duration_cooldown = 200
     
   def import_player_assets(self):
     character_path = './zelda-graphics/1 - level/graphics/player/'
@@ -39,7 +48,8 @@ class Player(pygame.sprite.Sprite):
   def input(self):
     if not self.attacking:
       keys = pygame.key.get_pressed() # capturo las teclas
-
+      
+      
       # movement input
       if keys[pygame.K_UP]:
         self.direction.y = -1
@@ -63,11 +73,20 @@ class Player(pygame.sprite.Sprite):
       if keys[pygame.K_SPACE]:
         self.attacking = True
         self.attack_time = pygame.time.get_ticks() # este get_ticks solo se llama una vez
+        self.create_attack()
       # magic input
       if keys[pygame.K_LCTRL]:
         self.attacking = True
         self.attack_time = pygame.time.get_ticks() 
-  
+
+      # change weapons
+      if keys[pygame.K_q] and self.can_switch_weapon:
+        self.can_switch_weapon = False
+        self.weapon_switch_time = pygame.time.get_ticks() # unique
+        self.weapon_index += 1
+        if self.weapon_index > len(list(weapon_data.keys())) -  1:
+          self.weapon_index = 0
+        self.weapon = list(weapon_data.keys())[self.weapon_index]
       
   def get_status(self):
    # idle status <- de donde venia antes de pararse?
@@ -122,10 +141,16 @@ class Player(pygame.sprite.Sprite):
   def cooldowns(self):
     current_time = pygame.time.get_ticks() # este se llama multiples veces
     if self.attacking:
-      if current_time - self.attack_time > self.attack_cooldown:
+      if current_time - self.attack_time >= self.attack_cooldown:
         self.attacking = False
+        self.destroy_attack()
         self.attack_time = None
-    
+    if not self.can_switch_weapon:
+      if current_time - self.weapon_switch_time >= self.switch_duration_cooldown:
+        self.can_switch_weapon = True
+        self.weapon_switch_time = None
+        
+     
   def animate(self):
     animation = self.animations[self.status] # esto me da una lista o array
     # loop over the frame indexes
