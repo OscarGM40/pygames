@@ -1,6 +1,7 @@
 				ZELDA STYLE GAME WITH PYGAMES LIB BY CLEAR-CODE
 
 Source: https://www.youtube.com/watch?v=QU1pPzEGrqw&ab_channel=ClearCode
+Repo: https://github.com/clear-code-projects/Zelda
 
 					MINUTO 40 COLLISIONS
 
@@ -145,3 +146,27 @@ Para ello vamos a crear la clase Weapon en weapon.py, y al crear el player le pa
 					3h 04 CREATING THE UI
 
 Hay que crear la healthbar,la energy bar, la experience bar,el cargador de magic,etc.
+Fijate en ciertas funciones básicas(pygame.draw.rect(surface,color,rect)
+Fijate como en Python tengo que restar el self como argumento,es decir que
+def show(self,status,color) <- no tiene tres argumentos sino dos,de echo cuando la llame solo la llamaré show(xxx,yyy) 
+
+TIP: pygame.display.get_surface() obtiene la referencia de la surface actual,por eso la estoy pasando en cada pygame.draw.rect(surface <- para que pinte en la surface actual y no en la del vecino. 	
+Surface es superficie
+
+TIP: puedo inflar una figura con inflate(x,y),por ejemplo si tengo un rect de 40x40 y le paso rect.inflate(10,10) será de 50x50.Fijate que rect no mutó,creo uno nuevo con otras dimensiones(y lo mismo para reducir una figura,le paso figura.inflate(-5,-5) y la haré un poco más pequeña
+
+Tips de hoy: puedo ponerme en modo siguiente ocurrencia con *(mayus + asterisk) o en modo anterior ocurrencia con #.Despues avanzo o retrocedo con n o con N.
+Recuerda copiar con ciw y pegar con viwp
+
+Puedo crear una figura cuadrática con pygame.Rect(left,top,ancho,alto).Esto creará un cuadrado de ancho x alto y a x pixeles del 0,0 segun left y top.Recuerda que en programacion la y va hacia abajo y restarla sería subir en la pantalla.
+rect = pygame.Rect(10,10,50,50) <- crea un cuadrado de 50x50 a 10,10 de la esquina superior izquierda(pero ojo,que falta pintar el cuadrado).Para pintarlo necesito un color y una superficie:
+pygame.draw.rect(self.display_surface,[20,20,20],rect)
+Mas tips: en Python se niega con la keyword not, no hay un operador reservado aún ya que son muy prehistorics.Para agregar a una lista con append(como el push) 
+
+Fijate que centro la linea en la que esté con zz(muy útil,debo usarlo más)
+
+			4H00 CREATING ENEMIES
+
+Dado que el player y los enemies son similares podrán compartir métodos.Los métodos para moverse y colisionar son un buen ejemplo de esta casuística.
+Para ello habrá que sacarlo de la clase Player y subirlos a una abstracción
+4h10m

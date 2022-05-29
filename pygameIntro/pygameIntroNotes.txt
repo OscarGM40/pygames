@@ -1,0 +1,87 @@
+				ULTIMATE INTRO TO PYGAME BY CLEAR CODE
+
+Source: https://www.youtube.com/watch?v=AY9MnQ4x3zk&t=32s&ab_channel=ClearCode
+Repo: https://github.com/clear-code-projects/UltimatePygameIntro
+
+Esencialmente,un juego es parecido a una película,dado que en cada frame de ésta hay una imagen.El cerebro humano considera que es una imagen animada(movimiento) a partir de 24 frames per second.Asi pues podriamos decir que una pelicula es un monton de imagenes pasadas secuencialmente + los sonidos apropiados.
+
+Hay tres formas de crear una película,la primera es grabar con una camara la realidad,la segunda es crear esas imagenes mediante un artista y la tercera es usar herramientas digitales.Al final acabariamos con un monton de imagenes que el cerebro interpretará como movimiento 
+
+Los videojuegos son un poco diferentes,ya que las imagenes se pueden generar mientras el juego está ejecutandose(en una pelicula se quedan fijas,siempre será la misma secuencia de frames).Muchas cosas como la posición de los enemigos,del jugador,etc serán diferentes,o generadas al azar en un videojuego.
+También hay un seguimiento constante de ciertas features,como la entrada del teclado,sprites,jugadores,enemigos,.. mientras que en una pelicula no hay seguimiento de nada.
+
+A esto se le llama event loop,y son listeners que están siempre activos,como la entrada del teclado, o durante determinado tiempo.Normalmente se pintará algo en la UI con estos datos.Normalmente este ciclo se ejecuta 30 ó 60 veces por segundo(frames per second).Esto es independiente de si el juego es 2D o 3D.
+
+					QUE HACE PYGAME EXACTAMENTE
+
+Si bien Pygame se suele usar para crear games,también vale para cargar imagenes,etc.Entre sus features destacan:
+1- Pygame me ayuda a dibujar imagenes/animaciones y a reproducir sonidos (algo que suele ser muy dificil y además ambas son  la base de los videojuegos)
+2- Pygame comprueba iterativamente por I/O del usuario(usar el método input() del core de Python paraliza el código asi que es inviable en videojuegos ya que son animados)Ayuda mucho(o simplemente es necesario) en la entrada del teclado
+3- Pygame también tiene otras herramientas para gamedev como colisiones,creación de textos,timers,...
+
+Como downside ningun juego AAA ó 3D usará Pygame.En vez de eso usarán Game Engines,que son programas que ayudan a crear videojuegos con editores de niveles,motores de físicas,animaciones base,... UnrealEngine,Unity o Godot son ejemplos de ello.
+Estas herramientas son indispensables ya que ayudan mucho al crear un videojuego.
+
+¿Porqué aprender Pygame entonces y no ir al Game Engine directamente?Con pygame resolveré muchos problemas yo mismo y me convertiré en un mejor programador.Además pdré aprender cualquier herramienta adicional o el Game Engine desde una mejor posición.
+Por el contrario,cuando use una Game Engine perderé flexibilidad ya que estoy atado a lo que me deje hacer ese motor de creación de videojuegos.
+Asi pues es mejor cimentar buenas bases y despues moverse a cualquier Engine.
+
+					EMPEZANDO CON PYGAME
+
+Lo primero será instalarlo,ya que no viene con el core de Python.Sin embargo es un simple paquete a instalar con pip:
+>pip install pygame
+
+					 CREAR UNA VENTANA
+
+Lo primero será importar la libreria.Despues, el método más importante es pygame.init() el cual inicia todo.Sin él no se puede hacer nada,no podŕe cargar imagenes,reproducir sonidos,...Además hay que llamarlo en primer lugar.
+
+Para crear una ventana tengo que usar el método pygame.display.set_mode((width,height)) el cual lleva una tupla con el ancho y alto de la ventana(además de otros posibles argumentos) 
+
+Sin embargo,si ejecuto el script veré que desaparece la ventana inmediatamente,ya que el script terminó inmediatamente.La solución es mantener el código ejecutandosé indefinidamente de alguna manera.Un bucle while True valdrá.Pero,ojo,dentro de él hay que llamar a pygame.display.update() para que re-renderize todo cada frame
+
+* Sabiendo todo esto,ya puedo crear una ventana que se ejecute indefinidamente
+import pygame
+
+pygame.init()
+screen = pygame.display.set_mode((800,400))
+while True:
+  pygame.display.update()
+
+Sin embargo,el usuario no podrá cerrar esa ventana de ninguna forma,hay que programarlo.Para ello hay que iterar sobre todos los eventos posibles(para obtenerlos se usa pygame.event.get() y comprobar si es de tipo pygame.QUIT(esta constante es sinónima de pulsar la X en la ventana)
+
+while True:
+  for event in pygame.event.get():
+    if event.type == pygame.QUIT:   <- la constante
+      pygame.quit()
+  pygame.display.update()
+
+* Bien,ahora cierra la ventana,pero da un error 'video system not initialized'.Esto es porque pygame.quit() es lo contrario de pygame.init() y para todo,pero fijate que en el bucle la siguiente linea también será ejecutada y ese update dará un error ya que pygame.quit() ha parado todo.La solucion pues es usar el módulo system(el cual es parte del core y no tengo que importarlo) usando sys.exit()
+Si bien podria usarse break o algo asi, lo mejor es usar el modulo system.
+
+Asi pues,ya tengo todo el cascarón para crear una ventana,ya que todo esto es obligatorio.
+
+import pygame
+from sys import exit
+
+pygame.init()
+screen = pygame.display.set_mode((800,600))
+
+while True:
+  for event in pygame.event.get():
+    if event.type == pygame.QUIT:
+      pygame.quit()
+      exit() <- también puedo usar sys.exit pero seria con import sys
+  pygame.display.update()
+
+
+DAR UN TITULO A LA VENTANA: obviamente,querré darle un título a la ventana.Para elo se usa el método pygame.display.set_caption(string)
+
+				CONTROLLING THE FRAMERRATE
+
+Esto es algo muy importante,si pongo muy alto el framerrate en una pc débil puede tener muchos fallos,o volverse injugable.Usar un framerrate constante a 60hz es lo ideal.Para ello hay que decirle al pc los framerrates máximos y mínimos(el máximo es muy sencillo,el mínimo no lo es).
+Para controlar esto debo instanciar la clase Clock.Es un estandar llamar a la instancia 'clock':
+clock = pygame.time.Clock()
+
+Despues se accede al método de instancia tick(Number) para fijar el framerrate máximo(el mínimo lo dejamos por la complejidad,además siendo juegos 2D muy básicos no deberían tener problemas los pcs en ejecutarlos,etc...)
+clock.tic(60) <- dentro del bucle while True,ojo!
+minuto 20

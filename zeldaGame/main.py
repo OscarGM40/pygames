@@ -25,7 +25,7 @@ class Game:
       # llamo al Level.run
       self.level.run()
       pygame.display.update()
-      self.clock.tick(FPS)
+      self.clock.tick(FPS) # vino de settings.py y es 60
 
 # si el name del file es main.py, se ejecuta el programa.No quiero otro punto de arranque
 if __name__ == '__main__':
