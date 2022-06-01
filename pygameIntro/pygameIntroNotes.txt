@@ -83,5 +83,99 @@ Para controlar esto debo instanciar la clase Clock.Es un estandar llamar a la in
 clock = pygame.time.Clock()
 
 Despues se accede al método de instancia tick(Number) para fijar el framerrate máximo(el mínimo lo dejamos por la complejidad,además siendo juegos 2D muy básicos no deberían tener problemas los pcs en ejecutarlos,etc...)
-clock.tic(60) <- dentro del bucle while True,ojo!
-minuto 20
+clock.tic(60) <- dentro del bucle while True,esto hará que el bucle se ejecute máximo 60 veces por segundo y el mínimo depende del equipo
+
+				MINUTO 20 DISPLAYING IMAGES
+
+Para dibujar cualquier tipo de imagen hay que entender el concepto de surface.Hay dos tipos de surfaces:
+1- display surface: la ventana del juego.Debe ser única y estar siempre visible
+2- regular surface: una única imagen,texto o color(importados).Puede haber varios(no hay límite) y sólo son visibles cuando se les asigne una display surface.
+
+Veamos todo esto en la practica,con un plain color,una image y un text.
+NOTA: para crear una surface se usa pygame.Surface((width,height)) <- tupla  
+
+text_surface = pygame.Surface((100,200)).
+* Y para agregarla a una surface se usa el método de instancia display-surface.blit(regular_surface,position).BLIT viene de BLockImageTransfer,lo cual sólo es una forma fancy de decir que quiero poner una regular surface en una display_surface
+
+IMPORTANTE: pygame.display.set_mode((w,h)) devolvió una display_surface,ya que al crear la ventana principal obviamente creó la display_surface,luego para agregar la regular surface anterior:
+
+screen = pygame.display.set_mode((800,400))
+text_surface = pygame.Surface((100,200))
+screen.blit(text_surface,(0,0)) <- obviamente position es una tupla
+
+* Bien,puedo ver que no veo nada,lo cual tiene sentido ya que son dos fondos negros superpuestos.Asi que mejor les damos un color a cada superficie,para ello hay que usar el método de instancia surface.fill(color).
+
+NOTA: pygame tiene varias formas de llamar a un color,por un string,por el hexadecimal.Fijate que de la version 1 a la 2 cambió un poco esto:
+text_surface.fill(pygame.Color('Red') constantes capitalizadas
+text_surface.fill(pygame.Color((255,0,0))) rgb
+text_surface.fill(pygame.Color((255,0,0,0.6))) rgba
+
+TIP:como siempre el punto 0,0 es la esquina superior izquierda,con lo que sumar al eje y es bajar y restar subir.
+Bien,esto era solo un ejemplo.Importemos la imagen que hará de fondo(para importar una imagen se usa pygame.image.load(path_to_image):
+sky_surface = pygame.image.load('graphics/Sky.png')
+ground_surface = pygame.image.load('graphics/ground.png')
+
+* Y los ubico con display_surface.blit(regular_surface,(pos)
+screen.blit(sky_surface,(0,0))
+screen.blit(ground_surface,(0,300))
+
+CREATING TEXT: para crear texto es un tanto diferente.Hay que seguir 3 pasos:
+
+1- crear una fuente(con tamaño,estilo,familia,...).Para ello se usa pygame.font.Font(family,size).Ejemplo: text = pygame.font.Font(None,50) <- 50px
+* Aparte de None puedo usar una ruta a una fuente => pygame.font.Font('fonts/Pixeltype.ttf',50).
+2- escribir texto en una surface.Para ello necesito la instancia anterior y el método render(texto,AntiAliasing,color).Ejemplo text_surface = text.render("Hola",False,'Red'). Fijate que el AA a true hará que el texto se vea un poco mejor.
+
+3- ubicar la text_surface con blit()
+screen.blit(text_surface,(100,100))
+
+Con esto ya he aprendido a dibujar textos, a dibujar superficies, a rellenar superficies con color y a importar y mostrar imágenes.Esto son operaciones fundamentales en un videojuego,aunquea un videojuego no es nada sin movimientos
+
+				ANIMACIONES BÁSICAS MINUTO 43
+
+Ahora mismo tenemos tres surfaces,pero todas están en una posición estática.Para animar de forma muy básica una imagen basta con cambiar la posicion en el método blit y que no sea un number estático:
+snail_surface = pygame.image.load('graphics/snail/snail1.png')
+snail_x_position = 600
+
+* Despues puedo meter en un bucle el screen.blit y además cuando desaparezca la imagen la puedo volver a cargar,creando un loop infinito
+  if snail_x_position < -100: snail_x_position = 800
+  screen.blit(snail_surface,(snail_x_position,250))
+
+IMPORTANTE: si quitará todas las imagenes y dejara sólo el caracol sobre un fondo negro veré un efecto muy raro como que se estira la imagen.Esto es porque no tiene un background definido(o sea que la imagen que esté más al fondo es muy importante pues hace de fondo a las demás)
+
+CONVERT_ALPHA: fijate que todo lo que he cargado son .png.Si además uso el método convert Pygame las cargará aún más rápido,ya que es algo que entiende mejor.Sin embargo esto no respetará el alpha asi que realmente lo que hay que usar es convert_alpha:
+
+sky_surface = pygame.image.load('graphics/Sky.png').convert_alpha()
+ground_surface = pygame.image.load('graphics/ground.png').convert_alpha()
+snail_surface = pygame.image.load('graphics/snail/snail1.png').convert_alpha()
+
+Resumen: cambiar en el blit los valores de una imagen crea una animación muy básica y es mejor convertir cada imagen que se cargue para mejor eficiencia
+
+					RECTANGLES M 51
+
+Los rectangúlos son muy importantes en un videojuego.Tienen dos objetivos básicos:
+1- posicionamiento preciso de superficies
+2- ayudan en la deteción de colisiones
+
+NOTA: los rectangles en pygame tienen 9 posiciones ya dadas(son todas tuplas):
+ topleft        midtop       topright
+ midleft        center       midright
+ bottomleft     midbottom    bottomright
+
+NOTA: los rectangles se crean con pygame.Rect(left,top,width,height),pero también puedo sacar el rectangulo de una superficie con get_rect:
+
+player_surface = pygame.image.load(path).convert_alpha
+player_rect = player_surface.get_rect(midbottom = (80,300) 
+
+TIP: más adelante veré que la combinación de una surface + un rect realmente es un sprite,incluso está esa clase y hay un montón de métodos para ella,pero es mejor entender que es un sprite realmente
+
+IMPORTANTE: y ahora que tengo esa imagen en un rectangulo puedo mover el rectangulo y asi mover la imagen de su interior:
+
+player_rect.left += 2
+
+Asi es como se mueve algo en pygame,no se mueve la surface sino el rect que contiene la surface.Y no solo esto,sino que puedo imprimirla para hacer calculos:
+print(player_rect.left,player_rect.top,etc...)
+
+					COLLISIONS WITH RECTANGLES
+
+
+  
