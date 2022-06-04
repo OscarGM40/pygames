@@ -177,5 +177,111 @@ print(player_rect.left,player_rect.top,etc...)
 
 					COLLISIONS WITH RECTANGLES
 
+ Para crear colisiones puedo usar el método de instancia rect1.colliderect(rect2) ,el cual comprobará si el rect1 colisiona con el 2.El método retorna 0 si no hay colision o 1 si si la hay(parece que ahora devuelve False y True .  
+NOTA: python convierte automáticamente 0 y 1 a False y True asi que realmente da igual que retorne 0 y 1 o False y True
+IMPORTANTE: la comprobación se hace por cada frame.
 
-  
+NOTA: hay otro tipo de método que puedo usar y es rect1.collidepoint((x,y)).No lo vamos a usar mucho pero es muy importante también.Simplemente comprueba si un punto colisiona con el rectangulo dado.
+Esto es algo que se hace mucho cuando se juega con el ratón
+
+				GETTING THE MOUSE POSITION
+
+Para obtener la posiciòn del mouse del usuario puedo usar dos approach.O bien uso pygame.mouse o event loop.
+El primero, pygame.mouse, retorna mucha información sobre el mouse, como la position,los clicks,los buttons,la visibility...
+El segundo, event loop, básicamente obtiene lo mismo(menos la visibility??), asi que ambas formas son completamente válidas.
+
+* Sabiendo todo esto puedo obtener la posición del mouse y comprobar si el puntero choca con el player,ie:
+mouse_pos = pygame.mouse.get_pos() <- devuelve la lista(x,y)
+if player_rect.collidepoint(mouse_pos): <- recuerda que pide una lista(x,y)
+  print('mouse collision against player') <- fijate que facil es saber si el puntero choca con algo.
+
+NOTA: y para saber si los botones estan siendo pulsados tengo pygame.mouse.get_pressed() que devuelve [Boolean,Boolean,Boolean] para los dos botones y la ruedecilla del mouse del usuario.
+
+La otra forma sería mirando por el evento:
+  if event.type == pygame.MOUSEMOTION:
+      print(event.pos)
+Y lo mismo para los botones:
+ if event.type == pygame.MOUSEBUTTONDOWN | MOUSEBUTTONUP <- para onRelease
+
+IMPORTANTE: puedo meter un texto en un rect también,no sólo una imagen:
+text_font = pygame.font.Font('font/Pixeltype.ttf',50)
+score_surf = text_font.render("Score",False,'Black')
+score_rect = score_surf.get_rect(center = (400,50))
+
+		USING RECTANGLES TO DRAW- MODULE PYGAME.DRAW 1H18M
+
+En pygame hay un módulo muy importante llamado draw,el cual puede dibujar rectangles,circles,lines,points,ellipses,etc.Casi siempre será con pygame.draw. y la figura,es decir:
+
+pygame.draw.rect() <- dibuja un rectangle
+pygame.draw.poligon()
+pygame.draw.circle()
+pygame.draw.arc()
+* Obviamente unos llevarán más argumentos que otros.Dibujemos un rect pues 
+  pygame.draw.rect(screen,'Pink',score_rect)
+  pygame.draw.rect(screen,'Pink',score_rect,6) <- en cuanto use el cuarto argumento que es el line width ya no rellenará el cuadrado por eso hay que repetir dos veces el rect
+
+Y por ejemplo una linea:
+ pygame.draw.line(screen,'Pink',(0,0),(800,400),6)
+
+Una ellipsis que será un circulo:
+pygame.draw.ellipse(screen,'Brown',pygame.Rect(50,200,100,100))
+
+			COLORS 1H25
+
+Hay dos formas de especificar colores en pygame(y en casi cualquier otro sitio).Una es con rgb y otra con hexadecimal
+Si uso hexadecimal me vale un string:
+pygame.draw.rect(screen,'#c0e8ec',score_rect)
+Si uso rgb tiene que ser una lista:
+score_surf = text_font.render("Score",False,(64,64,64))
+
+				 THE PLAYER CHARACTER 1H30M		
+
+El player es probablemente lo más importante de un game.Querremos varias cosas de él en este juego:
+1- keyboard input to move it(leer las teclas)
+2- jump + gravity(dado que saltará)
+3- creating a floor(no puede caer al infinito)
+
+De nuevo para leer el teclado tengo dos formas,una es mediante el módulo pygame.key y el otro capturando el evento en el event loop.Veamoslo en código:
+
+keys = pygame.key.get_pressed() <- este método devuelve una tupla inmensa con todas las teclas y su valor en formato False/True(ó 0 y 1).Dado que ellos ya han creado una constante para cada tecla puedo usar esto:
+if keys[pygame.K_SPACE]: <- fijate que siempre será pygame.K_XXX
+  do something
+
+En cuanto a usarlo en el bucle for event in pygame.event.get() primero miro por el vento KEYDOWN y despues por la key con la misma constante:
+    if event.type == pygame.KEYDOWN:
+      if event.key == pygame.K_ESCAPE: print("jump")
+
+* Hay dos formas de capturar las teclas porque en un juego normal usaré clases y alli tengo que usar los módulos pygame.key y pygame.mouse en vez de bucles.
+
+					JUMPING AND GRAVITY
+
+Dado que una caida no lleva una velocidad lineal,sino exponencial hay que tener mucho cuidado con cualquier movimiento que acelera o decelera incrementalmente
+Realmente es muy sencillo esto,sólo hay que usar dos incrementales:
+gravity += some value
+player.y += gravity <- cada vez será un poco más
+
+Tampoco es muy importante que las physics sean accurate al 100%.
+player_gravity = 0
+if event.type == pygame.MOUSEBUTTONDOWN:
+  if player_rect.collidepoint(event.pos): 
+    player_gravity = -20
+*En el bucle
+player_gravity += 1
+player_rect.bottom += player_gravity
+
+Ya tenemos el salto,claro que cae indefinidamente.Vamos a crear el suelo de una forma muy sencilla(si el player.bottom > 300 player.bottom = 300)
+NOTA: realmente no estamos mirando que haya una collision contra el suelo,es algo muy básico.
+
+				GAME OVER STATE - DIFERENTES STATES 1H 48M
+
+Queremos que el player no pueda tocar el caracol.Si lo hace se acaba el juego.De aqui podemos ver que hay dos estados(game over y game playing).Realmente es bastante sencillo parar todo el bucle que es el juego,metiendolo en un if/else:
+if game_active:
+  .... all logic
+else:
+  game_over
+
+De nuevo esto es bastante básico y no es lo mejor para un juego complejo.
+
+				DISPLAYING THE SCORE 1H 56M
+
+

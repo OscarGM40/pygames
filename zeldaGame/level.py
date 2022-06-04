@@ -1,4 +1,5 @@
 import pygame
+from enemy import Enemy
 from settings import *
 from support import import_csv_layout, import_folder
 from tile import Tile
@@ -29,6 +30,7 @@ class Level:
       'boundary': import_csv_layout('./zelda-graphics/1 - level/map/map_FloorBlocks.csv'),
       'grass': import_csv_layout('./zelda-graphics/1 - level/map/map_Grass.csv'),
       'object': import_csv_layout('./zelda-graphics/1 - level/map/map_LargeObjects.csv'),
+      'entities': import_csv_layout('./zelda-graphics/10 - Enemies/map/map_Entities.csv'),
     }
     graphics = {
       'grass': import_folder('./zelda-graphics/1 - level/graphics/grass'),
@@ -48,16 +50,25 @@ class Level:
             if style == 'object':
               surf = graphics['objects'][int(col)] # col es el index
               Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'object',surf)
-              pass
-    # no confundir,al player le meto solo en un grupo,el tercer arg es para el constructor(es decir,que son 3 args)
-    self.player = Player(
-      (2000,1430),
-      [self.visible_sprites],
-      self.obstacle_sprites,
-      self.create_attack,
-      self.destroy_attack,
-      self.create_magic) # los creo aqui y se los paso al Player por constructor
-          
+            if style == 'entities':
+              if col == '394': # es el id del jugador 
+                self.player = Player(
+                  (x,y),
+                  [self.visible_sprites],
+                  self.obstacle_sprites,
+                  self.create_attack,
+                  self.destroy_attack,
+                  self.create_magic) # los creo aqui y se los paso al Player por constructor
+              else:
+                if col == '390': monster_name = 'bamboo'
+                elif col == '391': monster_name = 'spirit'
+                elif col == '392': monster_name = 'raccoon'
+                else: monster_name = 'squid'
+                Enemy(monster_name,(x,y),
+                      [self.visible_sprites],
+                      self.obstacle_sprites)
+              
+
   def create_attack(self):
     self.current_attack = Weapon(self.player,[self.visible_sprites]) 
        
@@ -78,6 +89,7 @@ class Level:
     self.visible_sprites.update()
     # debug(self.player.direction)
     # debug(self.player.status)
+    self.visible_sprites.enemy_update(self.player)
     self.ui.display(self.player)
 
 class YSortCameraGroup(pygame.sprite.Group):  # extiende de Group
@@ -109,3 +121,8 @@ class YSortCameraGroup(pygame.sprite.Group):  # extiende de Group
     for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):
       offset_pos = sprite.rect.topleft - self.offset
       self.display_surface.blit(sprite.image,offset_pos)
+
+  def enemy_update(self,player):
+    enemy_sprites = [sprite for sprite in self.sprites() if hasattr(sprite,'sprite_type') and sprite.sprite_type == "enemy"]
+    for enemy in enemy_sprites:
+      enemy.enemy_update(player)

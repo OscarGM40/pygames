@@ -23,7 +23,7 @@ class Player(Entity):
     self.obstacle_sprites = obstacle_sprites
 
     #weapon setup
-    self.create_attack = create_attack # funcion que crea el ataque
+    self.create_attack = create_attack # funcion que crea el ataque,la recibe por args y la asigna a la propiedad self.create_attack
     self.destroy_attack = destroy_attack # funcion que destruye el ataque
     self.weapon_index = 0 # selector de arma
     self.weapon = list(weapon_data.keys())[self.weapon_index]
@@ -53,16 +53,14 @@ class Player(Entity):
       'right_attack':[],'left_attack':[],'up_attack':[],'down_attack':[]
       }
     for animation in self.animations.keys():
-      full_path = character_path +animation
+      full_path = character_path + animation
       self.animations[animation] = import_folder(full_path)
       
       
   def input(self):
     if not self.attacking:
-      keys = pygame.key.get_pressed() # capturo las teclas
-      
-      
       # movement input
+      keys = pygame.key.get_pressed() # capturo las teclas y switcheo por las constantes
       if keys[pygame.K_UP]:
         self.direction.y = -1
         self.status = 'up'

@@ -13,6 +13,6 @@ class Tile(pygame.sprite.Sprite):
       self.rect = self.image.get_rect(topleft = (pos[0],pos[1] - TILESIZE))
     else:
       self.rect = self.image.get_rect(topleft = pos)
-      # inflate(x,y) toma un rectangulo y cambia su size segun sus args
+      # inflate(x,y) toma un rectangulo y cambia su size,inflandolo,reduciendolo,etc...en este caso le bajamos un poco el hitbox en la y
     self.hitbox = self.rect.inflate(0,-10) 
 

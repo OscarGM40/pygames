@@ -5,9 +5,7 @@ from level import Level
 
 class Game:
   def __init__(self):
-
-    # general setup(muy básico,una pantalla y unos FPS)
-    # arranco pygame lo primero
+    # general setup
     pygame.init()
     self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption('Zelda 1.0.0')
@@ -17,10 +15,13 @@ class Game:
   def run(self):
     while True:
       for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT: # cierra el juego con la X
           pygame.quit()
           sys.exit()
-
+        if event.type == pygame.KEYDOWN:
+          if event.key == pygame.K_ESCAPE: # cierra con el ESCAPE
+            pygame.quit()
+            sys.exit()
       self.screen.fill([0,0,0])
       # llamo al Level.run
       self.level.run()
