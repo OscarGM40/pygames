@@ -284,4 +284,125 @@ De nuevo esto es bastante básico y no es lo mejor para un juego complejo.
 
 				DISPLAYING THE SCORE 1H 56M
 
+Para crear un marcador correctamente necesito:
+1- actualizar el score en cada frame
+2- ponerlo en una surface
+3- mostrar esa surface
 
+Para ello lo primero es obtener el tiempo actual,lo tengo en pygame.time.get_ticks(),el cual devuelve los ms actuales.Fijate que si lo meto en el bucle while se eejecutará cada frame,pero si no está en un bucle simplemente devuelve una vez ls milisegundos actuales
+
+TIP: puedo convertir a string de varias maneras.
+1- str(current_time)
+2- (f'{current_time}') <- fijate que es f'{}' el format siempre sobre el string
+
+* Puedo observar que ver los ms es una información que cambia muy rápido.
+
+  def display_score(self):
+    current_time = int(pygame.time.get_ticks() / 1000) - self.start_time
+    self.score_surf = self.text_font.render(f'Score {current_time}',False,(64,64,64))    
+    self.score_rect = self.score_surf.get_rect(center = (400,50))
+
+				IMPROVING THE GAME OVER SCREEN 2H 05M
+
+Queremos mejorar la pantalla de game over.Para ello hay que aprender como transformar surfaces(como escalarlas,rotarlas,...)Y para realizar esto está el módulo pygame.transform y sus métodos:
+pygame.transform.flip: flip vertically and horizontally
+pygame.transform.rotate: rotate an image
+pygame.transform.scale: resize to new resolution
+... 
+
+De momento usaremos scale(surface,(newWidht,newHeightS)) aunque se suele escalar con smoothscale,etc que será más costoso pero más correcto
+Fijate que scale2x(surface) también es muy usado y simplemente dobla la surface
+
+También pygame.transform.rotozoom(surface,angle,scale) combina scale y rotation y es muy usado:
+self.player_standing_surf = pygame.transform.rotozoom(self.player_standing_surf,0,2)
+Este método parece ofrecer un mejor algoritmo de escalado asi que lo usaremos sobre scale.Fijate que además sería muy sencillo meter un angle de rotation de la image.
+
+Fijate que Python se parece mucho a JS ya que las def puedo omitir el return(pero devuelven return None,ojo):
+  def create_standing_player(self):
+    self.player_standing_surf = pygame.image.load('graphics/Player/player_stand.png').convert_alpha()
+    # self.player_standing_surf = pygame.transform.scale(self.player_standing_surf,(150,150))
+    self.player_standing_surf = pygame.transform.rotozoom(self.player_standing_surf,0,2)
+    self.player_standing_rect = self.player_standing_surf.get_rect(center = (400,200))
+    return (self.player_standing_surf, self.player_standing_rect)
+  
+  def create_game_over_UI(self):
+    self.text_font = pygame.font.Font('font/Pixeltype.ttf',50) 
+    self.game_title_surf = self.text_font.render("Pixel Runner",False,(111,196,169))
+    self.game_title_rect = self.game_title_surf.get_rect(center = (410,80))
+    self.game_message = self.text_font.render("Press space to run",False,(111,196,169))
+    self.game_message_rect = self.game_message.get_rect(center = (410,340))
+    return(self.game_title_surf, self.game_title_rect, self.game_message, self.game_message_rect)
+
+					2H 20M DISPLAYING SCORE
+
+Para poder acceder al score desde esa zona que muestra la pantalla de game over tengo dos opciones.La primera es declarar una variable global:
+
+def display_score():
+  global current_time
+  current_time: int(pygame.time.get_ticks() / 1000) start_time
+
+La segunda es haciendo que la funcion retorne ese valor con un return y despues metiendo la llamada a la funcion en otra variable.
+
+def display_score():
+  current_time: int(pygame.time.get_ticks() / 1000) start_time
+  return current_time
+
+from_other_file = display_score()
+
+						TIMERS 2H 25M
+
+We want another enemy in the game.Para ello tendré que seguir varios pasos:
+1- Create a custom event
+2- Tell pygame to trigger that event continously
+3- Add code in the event loop to do what I need
+
+NOTA: fijate que fácil era cambiar las surfaces mirando por la posición en el eje y:
+
+  def create_enemies(self):
+    # for enemy_rect in self.level.enemies_list:
+    if(self.level.enemies):
+      for enemy_rect in self.level.enemies['rects']:
+        enemy_rect.x -= 5
+        if enemy_rect.bottom == 300:
+          self.screen.blit(self.level.snail_surf, enemy_rect)
+        else:
+          self.screen.blit(self.level.fly_surf, enemy_rect)
+          # list comprehension(x for x in list if ...):  
+      self.level.enemies_list = [enemy_rect for enemy_rect in self.level.enemies_list if enemy_rect.x > -100]
+      
+    return self.level.enemies_list
+
+Cuando choque el player queremos resetear la gravity,la posición y la lista de coolider_rects de los enemies,para que no choque inmediatamente en el siguiente frame:
+  self.level.enemies_list.clear() 
+        self.level.player_rect.midbottom = (80,300)
+        self.level.player_gravity = 0
+
+			ANIMATE THE PLAYER,THE FLY AND THE SNAIL 2h50m
+
+Si consigo animar los sprites será algo que quede muy bien,una gran mejora.Un juego con animaciones siempre luce mucho mejor que con sprites estáticos
+Haremos algo muy básico,simplemente cambiaremos el sprite cada ciertos ms.
+
+Para hacer esto usaremos nuestro propio timer si se trata de la animation del player,pero we will rely on the inbuild timers to update enemies surfaces/sprites.
+
+Lo primero es declarar todo lo necesario.
+  def create_player(self):
+    player_walk_1 = pygame.image.load('graphics/Player/player_walk_1.png').convert_alpha()
+    player_walk_2 = pygame.image.load('graphics/Player/player_walk_2.png').convert_alpha()
+    self.player_walk = [player_walk_1, player_walk_2]
+    self.player_index = 0
+    self.player_jump = pygame.image.load('graphics/Player/jump.png').convert_alpha()
+    self.player_surf = self.player_walk[self.player_index]
+    self.player_rect = self.player_surf.get_rect(midbottom = (80,300)) 
+
+Despues creo el método:
+  def player_animation(self):
+    global player_surf,player_index
+    # si no toca el suelo cambio el sprite
+    if self.level.player_rect.bottom < 300:
+      self.level.player_surf = self.level.player_jump
+    else:
+      self.level.player_index += 0.1
+      self.level.player_surf = self.level.player_walk[int(self.level.player_index) % len(self.level.player_walk)]
+
+Para los enemigos es un poco más complejo,ya que no solo hay uno
+3h10
