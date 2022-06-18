@@ -1,6 +1,8 @@
+from random import choice
 import pygame, sys
 from level import Level
-
+from obstacle import Obstacle
+from player import Player
 
 class Game:
   def __init__(self):
@@ -9,12 +11,23 @@ class Game:
     # para crear una ventana se usa pygame.display.set_mode((width, height))
     self.screen = pygame.display.set_mode((800, 400))
     # doy un title a la ventana con pygame.display.set_caption(string)
-    pygame.display.set_caption("Runner")
+    pygame.display.set_caption("Pixeled Runner")
     # para fijar el framerrate máximo necesito instanciar la clase Clock
     self.clock = pygame.time.Clock()
     self.game_active = True
     self.level = Level()
     self.score = 0
+    self.bg_music = pygame.mixer.Sound('audio/music.wav')
+    self.bg_music.set_volume(0.6)
+    self.bg_music.play(loops = -1)
+    
+    
+    # Grupos de Sprites
+    self.player = pygame.sprite.GroupSingle()
+    self.player.add(Player())
+
+    self.obstacles_group = pygame.sprite.Group()
+    
     self.text_font = pygame.font.Font('font/Pixeltype.ttf',50) 
     # siempre hay que sumar 1 más a USERVENT por cada timer que cree 
     self.obstacle_timer = pygame.USEREVENT  + 1
@@ -22,17 +35,24 @@ class Game:
     pygame.time.set_timer(self.obstacle_timer, 1300)
     # más timers para animar los enemies
     self.snail_animation_timer = pygame.USEREVENT + 2
-    pygame.time.set_timer(self.snail_animation_timer, 300)
+    pygame.time.set_timer(self.snail_animation_timer, 1200)
     self.fly_animation_timer = pygame.USEREVENT + 3
-    pygame.time.set_timer(self.fly_animation_timer, 200)
+    pygame.time.set_timer(self.fly_animation_timer, 1200)
 
-  def collisions(self,player,obstacles):
-    if obstacles:
-      for obstacle_rect in obstacles:
-        if player.colliderect(obstacle_rect):
-          return False
-    return True
-
+  # def collisions(self,player,obstacles):
+  #   if obstacles:
+  #     for obstacle_rect in obstacles:
+  #       if player.colliderect(obstacle_rect):
+  #         return False
+  #   return True
+  
+  def collision_sprite(self):
+    if pygame.sprite.spritecollide(self.player.sprites()[0],self.obstacles_group,False):
+      # para que no vuelva a chocar con el Sprite al reiniciar
+      self.obstacles_group.empty() 
+      return False
+    else: return True
+    
   def player_animation(self):
     global player_surf,player_index
     # si no toca el suelo cambio el sprite
@@ -62,6 +82,7 @@ class Game:
     # por si sóla no sabe cerrarse la ventana,hay que capturar el evento QUIT
       for event in pygame.event.get(): 
         if event.type == pygame.QUIT:
+          self.bg_music.stop()
           pygame.quit()
           sys.exit()
         if self.game_active:
@@ -91,27 +112,27 @@ class Game:
           self.level.enemies_list.append(newEnemy[1])
           self.level.types.append(newEnemy[2])
         if event.type == self.snail_animation_timer and self.game_active:
-          snail_frame_1 = pygame.image.load('graphics/snail/snail1.png').convert_alpha()
-          snail_frame_2 = pygame.image.load('graphics/snail/snail2.png').convert_alpha()
-          snail_frames = [snail_frame_1, snail_frame_2]
-          self.level.snail_surf = snail_frames[0]
-          if self.level.snail_frame_index == 0:
-            self.level.snail_frame_index = 1
-          else:
-            self.level.snail_frame_index = 0
-          self.level.snail_surf = snail_frames[self.level.snail_frame_index]
+          self.obstacles_group.add(Obstacle(choice(['fly','snail','snail'])))
+          # snail_frame_1 = pygame.image.load('graphics/snail/snail1.png').convert_alpha()
+          # snail_frame_2 = pygame.image.load('graphics/snail/snail2.png').convert_alpha()
+          # snail_frames = [snail_frame_1, snail_frame_2]
+          # self.level.snail_surf = snail_frames[0]
+          # if self.level.snail_frame_index == 0:
+          #   self.level.snail_frame_index = 1
+          # else:
+          #   self.level.snail_frame_index = 0
+          # self.level.snail_surf = snail_frames[self.level.snail_frame_index]
         if event.type == self.fly_animation_timer and self.game_active:
-          fly_frame_1 = pygame.image.load('graphics/Fly/Fly1.png').convert_alpha()
-          fly_frame_2 = pygame.image.load('graphics/Fly/Fly2.png').convert_alpha()
-          fly_frames = [fly_frame_1,fly_frame_2]
-          self.level.fly_surf = fly_frames[0]
-          if self.level.fly_frame_index == 0:
-            self.level.fly_frame_index = 1
-          else:
-            self.level.fly_frame_index = 0
-          self.level.fly_surf = fly_frames[self.level.fly_frame_index]
-  
-                   
+          pass
+          # fly_frame_1 = pygame.image.load('graphics/Fly/Fly1.png').convert_alpha()
+          # fly_frame_2 = pygame.image.load('graphics/Fly/Fly2.png').convert_alpha()
+          # fly_frames = [fly_frame_1,fly_frame_2]
+          # self.level.fly_surf = fly_frames[0]
+          # if self.level.fly_frame_index == 0:
+          #   self.level.fly_frame_index = 1
+          # else:
+          #   self.level.fly_frame_index = 0
+          # self.level.fly_surf = fly_frames[self.level.fly_frame_index]
           
               
       if self.game_active:
@@ -122,21 +143,26 @@ class Game:
         # pygame.draw.line(self.screen,'Pink',(0,0),(800,400),6)
         pygame.draw.ellipse(self.screen,(255,222,89),pygame.Rect(50,60,70,70))
         self.score = self.level.display_score()
-        self.level.enemies_list = self.create_enemies()
+        # self.level.enemies_list = self.create_enemies()
         # collisions
-        self.game_active = self.collisions(self.level.player_rect,self.level.enemies_list)
-        self.player_animation()
+        # self.game_active = self.collisions(self.level.player_rect,self.level.enemies_list)
+        self.game_active = self.collision_sprite()
+        # self.player_animation()
         self.screen.blit(self.level.score_surf,self.level.score_rect)
         self.screen.blit(self.level.lives_surf,self.level.lives_rect)
     
         # self.screen.blit(self.level.snail_surf,self.level.snail_rect)
     
-        self.level.player_gravity += 1
-        self.level.player_rect.bottom += self.level.player_gravity
-        if self.level.player_rect.bottom >= 300:
-          self.level.player_is_jumping = False
-          self.level.player_rect.bottom = 300
-        self.screen.blit(self.level.player_surf,self.level.player_rect)
+        # self.level.player_gravity += 1
+        # self.level.player_rect.bottom += self.level.player_gravity
+        # if self.level.player_rect.bottom >= 300:
+        #   self.level.player_is_jumping = False
+        #   self.level.player_rect.bottom = 300
+        # self.screen.blit(self.level.player_surf,self.level.player_rect)
+        self.player.draw(self.screen)
+        self.player.update()
+        self.obstacles_group.draw(self.screen)
+        self.obstacles_group.update()
 
         
         # si toca el snail se acaba el juego

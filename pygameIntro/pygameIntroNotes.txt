@@ -405,4 +405,69 @@ Despues creo el método:
       self.level.player_surf = self.level.player_walk[int(self.level.player_index) % len(self.level.player_walk)]
 
 Para los enemigos es un poco más complejo,ya que no solo hay uno
-3h10
+
+						SPRITES 3H 10M
+
+Lo primero es entender que un sprite es la unión de una image + el rectangle.Al usar un sprite manejaré de forma más sencillas los enemies,el player,etc.
+Hay varios tipos de sprite,el jugador va a estar en un grupo con una single sprite(pues es siempre el mismo player) mientras que los enemies van a necesitar una sprite diferente cada uno).Esto se hace para detectar las colisiones,cada enemy tiene una collisionrect diferente,mientras que el player es la misma.
+
+IMPORTANTE: los Sprites tienen dos funcionalidades claras.La primera es reducir código al ser la unión de la image + el rect para las colisiones,etc, pero la segunda es poder ejecutar el método update sobre ellos en vez de llamar a cada método suyo individualmente.
+Al final creo el sprite eligiendo un grupo y despues le paso una instancia con add:
+
+self.player = pygame.sprite.SingleGroup()
+self.player.add(Player()) <-le paso la instancia de Player 
+
+Ahora,puedo crear un método update en la clase Player que llame a todos los demás de la clase y llamarlo con self.player.update(),llamando pues a todos(es como un init().Genial.
+
+Fijate que se convierte en un juego de niños en cuanto uso Sprites:
+* Para moverlo
+  def update(self):
+    self.animation_state()
+    self.rect.x -= 5
+* Para destruirlo tengo el método kill por ser un Sprite
+  def destroy(self):
+    if self.rect.x <= -100:
+      self.kill()
+
+		COLLISIONS CON SPRITES == SPRITECOLLIDE(sprite,group,dokill)
+
+Afortunadamente manejar las colisiones es también muy sencillo con la clase Sprite,ya que tiene su propio método spritecollide(sprite) el cual toma un sprite y mira a ver si está colisionando con cualquier otro grupo de sprites.Si choca lo que hace es retornar una lista de todos los Sprites con los que colisiona.
+NOTA: hay más métodos para manejar colisiones con Sprites,pero éste es el más usado.
+
+Siendo tan simple puedo hacer esto:
+
+  def collision_sprite(self):
+    if pygame.sprite.spritecollide(self.player.sprites()[0],self.obstacles_group,False):
+      # para que no vuelva a chocar con el Sprite al reiniciar
+      self.obstacles_group.empty() 
+      return False
+    else: return True
+
+Fijate que tmb podia haber accedido con self.player.sprite pues es un SingleGroup,pero si fuera un Group tengo que acceder mediante sprites().
+Desde luego es mucho más simple
+Recuerda que spritecollide devuelve una lista,entiendo que está mirando si esta con elementos o no.
+
+IMPORTANTE: y fijate que rápido eliminé un grupo de Sprites con instancia.empty().Increible.
+
+						ADDING MUSIC/SOUNDSC 3H 43M
+
+Realmente esta parte va a ser muy sencilla.Solo vamos a tener dos sonidos,la musica de background y cuando salte el player.
+
+Para importar un sonido se usa el modulo mixer y la clase Sound.Fijate que puedo regular el volumen si lo traigo muy fuerte:
+
+self.jump_sound = pygame.mixer.Sound('audio/jump.mp3')
+self.jump_sound.set_volume(0.5) # rango entre 0 y 1
+
+Despues simplemente lo reproduzco con instancia.play():
+    if keys[pygame.K_SPACE] and self.rect.bottom >= 300:
+      self.gravity = -20
+      self.jump_sound.play()
+
+Y para dejar el sonido infinito le pongo las loops a -1:
+ self.bg_music = pygame.mixer.Sound('audio/music.wav')
+    self.bg_music.play(loops = -1)
+Recuerda que puedo pararlo con stop()cuando salga,etc...
+Desde luego ha sido un gran tutorial
+
+
+
