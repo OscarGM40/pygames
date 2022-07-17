@@ -18,7 +18,7 @@ class Player(Entity):
     # Movement: Vector2 da el movimiento.por defecto será x=0 e y=0,puede moverse en x=1 o sea a la derecha o en x=-1 a la izquierda y ademas con cierta speed(x=5 será una velocidad de 5)
     # self.direction = pygame.math.Vector2() viene del padre Entity
     self.attacking = False
-    self.attack_cooldown = 400
+    self.attack_cooldown = 100
     self.attack_time = None
     self.obstacle_sprites = obstacle_sprites
 
@@ -44,6 +44,11 @@ class Player(Entity):
     self.energy = self.stats['energy']
     self.exp = 123
     self.speed = self.stats['speed']
+    
+    # invincibility timer(for attacks)
+    self.vulnerable = True
+    self.hurt_time = None
+    self.invulnerability_duration = 500
     
   def import_player_assets(self):
     character_path = './zelda-graphics/1 - level/graphics/player/'
@@ -132,19 +137,25 @@ class Player(Entity):
   
   def cooldowns(self):
     current_time = pygame.time.get_ticks() # este se llama multiples veces
+    
     if self.attacking:
-      if current_time - self.attack_time >= self.attack_cooldown:
+      if current_time - self.attack_time >= self.attack_cooldown + weapon_data[self.weapon]['cooldown']:
         self.attacking = False
         self.destroy_attack()
-        self.attack_time = None
+        # self.attack_time = None
+        
     if not self.can_switch_weapon:
       if current_time - self.weapon_switch_time >= self.switch_duration_cooldown:
         self.can_switch_weapon = True
-        self.weapon_switch_time = None
+        # self.weapon_switch_time = None
+
     if not self.can_switch_magic:
       if current_time - self.magic_switch_time >= self.switch_duration_cooldown:
         self.can_switch_magic = True
-        self.magic_switch_time = None
+        # self.magic_switch_time = None
+    if not self.vulnerable:
+      if current_time - self.hurt_time >= self.invulnerability_duration:
+        self.vulnerable = True
         
   def animate(self):
     animation = self.animations[self.status] # esto me da una lista o array
@@ -155,6 +166,17 @@ class Player(Entity):
     #set the image
     self.image = animation[int(self.frame_index)]
     self.rect = self.image.get_rect(center = self.hitbox.center) # hay que actualizar el cento por la diferencia de tamaño de las images
+    # flicker if it receives an attack
+    if not self.vulnerable:
+      alpha = self.wave_value()
+      self.image.set_alpha(alpha)
+    else:
+      self.image.set_alpha(255) # opacity a 1
+  
+  def get_full_weapon_damage(self):
+    base_damage = self.stats['attack']
+    weapon_damage = weapon_data[self.weapon]['damage']
+    return base_damage + weapon_damage
   
   def update(self):
     self.input()

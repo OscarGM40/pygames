@@ -103,7 +103,7 @@ class Level:
 				collision_sprites = pygame.sprite.spritecollide(attack_sprite,self.attackable_sprites,False)
 				if collision_sprites:
 					for target_sprite in collision_sprites:
-						if target_sprite.sprite_type == 'grass':
+						if target_sprite.sprite.type == 'grass':
 							target_sprite.kill()
 						else:
 							target_sprite.get_damage(self.player,attack_sprite.sprite_type)

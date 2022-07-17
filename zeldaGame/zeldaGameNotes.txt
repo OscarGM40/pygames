@@ -213,4 +213,35 @@ Implemento los cooldowns,etc.
 
 				4H57M PLAYER-ENEMIES INTERACTION
 
+Esta interacción va a ir en dos direcciones,ya que ambos pueden atacarse mutuamente.Para ello creo dos grupos de sprites:
 
+self.attack_sprites = pygame.sprite.Group()
+self.attackable_sprites = pygame.sprite.Group()
+
+Para comprobar si el player puede atacar,recuerda que al trabajar con sprites tengo el metodo estático pygame.sprite.spritecollide(quien,contraquien,matardeungolpe):
+
+  def player_attack_logic(self):
+    if self.attack_sprites:
+      for attack_sprite in self.attack_sprites:
+        # pygame.sprite.spritecollide(sprite,group,DOKILL)
+        collision_sprites = pygame.sprite.spritecollide(attack_sprite,self.attackable_sprites,False)
+        if collision_sprites:
+          for target_sprite in collision_sprites:
+            target_sprite.kill() 
+
+De momento podemos matar a cualquier sprite con el que choquemos(target_sprite.kill()) aunque obviamente hay que mejorar esto.
+Al mejorarlo queda asi:
+
+  if target_sprite.sprite_type == 'grass':
+    target_sprite.kill()
+  else:
+     target_sprite.get_damage(self.player,attack_sprite.sprite_type)
+
+En este punto se introducen muchos métodos(seguir video).
+
+				PARTICLES 5H33M
+
+Una particle es simplemente un sprite con una animación.Es más sencillo de lo que parece,sólo que ese sprite se autodestruye cuando termina esa animación.
+
+Dado que son muchas,lo que mejor es importarlas despues de que empiece el juego(es decir,tenerlas importadas de antemano),ya que si las importamos en el momento que el enemigo muera,etc se darán ralentizaciones
+5h56m
