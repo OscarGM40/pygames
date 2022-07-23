@@ -32,7 +32,7 @@ weapon_data = {
 
 # magic
 magic_data = {
-	'flame': {'strength': 5,'cost': 20,'graphic':'./zelda-graphics/9 - Magic/graphics/particles/flame/fire.png'},
+	'flame': {'strength': 15,'cost': 20,'graphic':'./zelda-graphics/9 - Magic/graphics/particles/flame/fire.png'},
 	'heal' : {'strength': 20,'cost': 10,'graphic':'./zelda-graphics/9 - Magic/graphics/particles/heal/heal.png'}}
 
 
