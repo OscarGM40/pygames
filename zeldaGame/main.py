@@ -22,6 +22,9 @@ class Game:
           if event.key == pygame.K_ESCAPE: # cierra con el ESCAPE
             pygame.quit()
             sys.exit()
+          if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_m: # entra al menu con la m
+              self.level.toggle_menu()
       self.screen.fill([0,0,0])
       # llamo al Level.run
       self.level.run()

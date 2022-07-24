@@ -290,4 +290,9 @@ class MagicPlayer:
         self.animation_player.create_particles('flame',(x,y),groups)
 
 
+				UPGRADES IN THE UI AND MENU 6H26M
 
+1- The player needs to get xp from killing enemies
+2- His stats should be increased due to this
+Lo más complejo será actualizar la GUI.
+7h05m

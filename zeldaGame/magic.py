@@ -19,7 +19,8 @@ class MagicPlayer:
   def flame(self,player,cost,groups):
     if player.energy >= cost:
       player.energy -= cost
-
+    else:
+      return
     if player.status.split('_')[0] == 'right':
       direction = pygame.math.Vector2(1,0)
     elif player.status.split('_')[0] == 'left':

@@ -22,6 +22,12 @@ HEALTH_COLOR = 'red'
 ENERGY_COLOR = 'blue'
 UI_BORDER_COLOR_ACTIVE = 'gold'
 
+# upgrade menu
+TEXT_COLOR_SELECTED = '#111111'
+BAR_COLOR = '#EEEEEE'
+BAR_COLOR_SELECTED = '#111111'
+UPGRADE_BG_COLOR_SELECTED = '#EEEEEE'
+
 weapon_data = {
   'sword':{'cooldown':100,'damage':15,'graphic':'./zelda-graphics/8 - UI/graphics/weapons/sword/full.png'},
   'lance': {'cooldown':400,'damage':30,'graphic':'./zelda-graphics/8 - UI/graphics/weapons/lance/full.png'},
