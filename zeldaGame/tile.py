@@ -7,6 +7,7 @@ class Tile(pygame.sprite.Sprite):
     super().__init__(groups)
     # self.image = pygame.image.load('./zelda-graphics/5 - level graphics/graphics/test/rock.png').convert_alpha()
     self.sprite_type = sprite_type
+    y_offset = HITBOX_OFFSET[sprite_type]
     self.image = surface
     if sprite_type == 'object':
       #do an offset
@@ -14,5 +15,5 @@ class Tile(pygame.sprite.Sprite):
     else:
       self.rect = self.image.get_rect(topleft = pos)
       # inflate(x,y) toma un rectangulo y cambia su size,inflandolo,reduciendolo,etc...en este caso le bajamos un poco el hitbox en la y
-    self.hitbox = self.rect.inflate(0,-10) 
+    self.hitbox = self.rect.inflate(0,y_offset) 
 

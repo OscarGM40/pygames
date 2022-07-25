@@ -295,4 +295,10 @@ class MagicPlayer:
 1- The player needs to get xp from killing enemies
 2- His stats should be increased due to this
 Lo más complejo será actualizar la GUI.
-7h05m
+
+Fijate que self.font.render espera un string y cost es un number.Hay que pasar a string,con un simple format vale:
+
+cost_surf = self.font.render(f'{int(cost)}',False,TEXT_COLOR)
+
+
+

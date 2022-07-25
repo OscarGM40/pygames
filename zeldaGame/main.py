@@ -11,6 +11,10 @@ class Game:
     pygame.display.set_caption('Zelda 1.0.0')
     self.clock = pygame.time.Clock()
     self.level = Level()
+    # sound
+    main_sound = pygame.mixer.Sound('./zelda-graphics/15 - fixes audio/audio/main.ogg')
+    main_sound.set_volume(0.5)
+    main_sound.play(loops = -1)    
 
   def run(self):
     while True:
@@ -25,7 +29,7 @@ class Game:
           if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_m: # entra al menu con la m
               self.level.toggle_menu()
-      self.screen.fill([0,0,0])
+      self.screen.fill(WATER_COLOR)
       # llamo al Level.run
       self.level.run()
       pygame.display.update()

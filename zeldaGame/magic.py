@@ -5,12 +5,18 @@ from settings import *
 class MagicPlayer:
   def __init__(self,animation_player):
     self.animation_player = animation_player
+    self.sounds = {
+      'heal':pygame.mixer.Sound('./zelda-graphics/15 - fixes audio/audio/heal.wav'),
+      'flame':pygame.mixer.Sound('./zelda-graphics/15 - fixes audio/audio/Fire.wav')
+    }
+    
 
   def heal(self,player,strength,cost,groups):
     
     if player.energy >= cost:
       player.health += strength
       player.energy -= cost
+      self.sounds['heal'].play()
       if player.health >= player.stats['health']:
         player.health = player.stats['health']
       self.animation_player.create_particles('aura',player.rect.center,groups)
@@ -19,6 +25,7 @@ class MagicPlayer:
   def flame(self,player,cost,groups):
     if player.energy >= cost:
       player.energy -= cost
+      self.sounds['flame'].play()
     else:
       return
     if player.status.split('_')[0] == 'right':
